@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include <DFMiniMp3.h>
+#include <math.h>
 
 class Mp3Notify
 {
@@ -83,7 +84,7 @@ void setup(){
     uint16_t volume = mp3.getVolume();
     Serial.print("volume ");
     Serial.println(volume);
-    mp3.setVolume(10);
+    mp3.setVolume(60);
 
     uint16_t count = mp3.getTotalTrackCount();
     Serial.print("files ");
@@ -97,8 +98,6 @@ void loop(){
     long now = millis();
     long elapsed = now - lastHummed;
     if (elapsed > wait){
-        Serial.print("elapsed is ");
-        Serial.println(elapsed);
         if(isHumming){
             Serial.println("is humming!");
             Serial.println("huummmmmmmmmmmmm   playing hum.");
@@ -117,9 +116,7 @@ void loop(){
         ignite();
     } else {
         Serial.println("DOWN!");
-        mp3.playMp3FolderTrack(POWER_DOWN);  // sd:/mp3/0001.mp3
-        waitMilliseconds(2500);
-        isHumming = 0;
+        powerdown();
     }
   }
 
@@ -141,12 +138,13 @@ void ignite(){
 
     for(int i = 0; i < 1800; i++){
         for(int s = 0; s < SEGMENT_COUNT; s++){
-            b = brightness[s];
+            int b = brightness[s];
             if (b < 0){
                 b = 0;
             }
-            
-            digitalWrite(SEGMENTS[s], b);
+            int f = round(b / 7);
+
+            digitalWrite(SEGMENTS[s], f);
         }
         for(int s = 0; s < SEGMENT_COUNT; s++){
            brightness[s]++;
@@ -158,5 +156,39 @@ void ignite(){
     isHumming = 1;
     play(HUM);
     lastHummed = millis();
+}
+
+void powerdown(){
+    play(POWER_DOWN);
+    isHumming = 0;
+    for(int s = 0; s < SEGMENT_COUNT; s++){
+        digitalWrite(SEGMENTS[s], 0);
+    }
+    waitMilliseconds(2500);
+
+    // ignite is 1800 millis long
+    // 6 segments means each are 300ms apart
+    int brightness[] = { 1500, 1200, 900, 600, 300, 0};
+
+//    for(int i = 0; i < 1800; i++){
+//        for(int s = 0; s < SEGMENT_COUNT; s++){
+//            int b = brightness[s];
+//            if (b < 0){
+//                b = 0;
+//            }
+//            int f = round(b / 7);
+//
+//            digitalWrite(SEGMENTS[s], f);
+//        }
+//        for(int s = 0; s < SEGMENT_COUNT; s++){
+//           brightness[s]++;
+//        }
+//        delay(1);
+//    }
+//
+//    waitMilliseconds(2500);
+//    isHumming = 1;
+//    play(HUM);
+//    lastHummed = millis();
 }
 
