@@ -137,10 +137,20 @@ void ignite(){
 
     // ignite is 1800 millis long
     // 6 segments means each are 300ms apart
-    int brightness[] = { 0, -300, -600, -900 -1200, -1500 }
+    int brightness[] = { 0, -300, -600, -900 -1200, -1500 };
 
-    for(int i = 0, ; i < SEGMENT_COUNT; i++, brightness[0]++, brightness[1]++, brightness[2]++, brightness[3]++, brightness[4]++, brightness[5]++){
-        digitalWrite(SEGMENTS[i], brightness[i])
+    for(int i = 0; i < 1800; i++){
+        for(int s = 0; s < SEGMENT_COUNT; s++){
+            b = brightness[s];
+            if (b < 0){
+                b = 0;
+            }
+            
+            digitalWrite(SEGMENTS[s], b);
+        }
+        for(int s = 0; s < SEGMENT_COUNT; s++){
+           brightness[s]++;
+        }
         delay(1);
     }
 
