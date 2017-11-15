@@ -70,24 +70,26 @@ long lastHummed = 0;
 long wait = 5000;
 
 void setup(){
-  Serial.begin(9600);
+    Serial.begin(9600);
+    for(int i = 0; i < count(SEGMENTS); i++){
+        pinMode(i, OUTPUT);
+    }
+    pinMode(4, INPUT);
 
-  pinMode(4, INPUT);
+    Serial.println("initializing...");
 
-  Serial.println("initializing...");
+    mp3.begin();
 
-  mp3.begin();
+    uint16_t volume = mp3.getVolume();
+    Serial.print("volume ");
+    Serial.println(volume);
+    mp3.setVolume(10);
 
-  uint16_t volume = mp3.getVolume();
-  Serial.print("volume ");
-  Serial.println(volume);
-  mp3.setVolume(10);
+    uint16_t count = mp3.getTotalTrackCount();
+    Serial.print("files ");
+    Serial.println(count);
 
-  uint16_t count = mp3.getTotalTrackCount();
-  Serial.print("files ");
-  Serial.println(count);
-
-  Serial.println("starting...");
+    Serial.println("starting...");
 }
 
 void loop(){
@@ -109,17 +111,10 @@ void loop(){
 
   int btn = digitalRead(4);
 
-  Serial.print("button is ");
-  Serial.println(btn);
-
-  if(btn == HIGH){
+  if(btn == LOW){
     if (!isHumming){
         Serial.println("IGNITE!");
-        mp3.playMp3FolderTrack(IGNITE);  // sd:/mp3/0001.mp3
-        waitMilliseconds(2500);
-        isHumming = 1;
-        mp3.playMp3FolderTrack(HUM);  // sd:/mp3/0001.mp3
-        lastHummed = millis();
+        ignite();
     } else {
         Serial.println("DOWN!");
         mp3.playMp3FolderTrack(POWER_DOWN);  // sd:/mp3/0001.mp3
@@ -128,11 +123,22 @@ void loop(){
     }
   }
 
-    Serial.println("bye...");
-
     mp3.loop();  // sd:/mp3/0001.mp3
     delay(5);
 }
 
+void play(int track){
+    // sd:/mp3/0001.mp3 where number is 'track'
+    mp3.playMp3FolderTrack(track);
+}
 
+void ignite(){
+    play(IGNITE);
+
+//    int one, two, three, four, fix, six = 0, 0, 0, 0, 0, 0;
+    waitMilliseconds(2500);
+    isHumming = 1;
+    play(HUM);
+    lastHummed = millis();
+}
 
