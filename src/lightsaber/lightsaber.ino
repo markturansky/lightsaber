@@ -50,6 +50,7 @@ int SWING_MEDIUM = 6;
 int SWING_MEDIUM_DEEPER_PITCH = 7;
 
 int SEGMENTS[] = {3, 5, 6, 9, 10, 11};
+int SEGMENT_COUNT = 6;
 
 // instance a DFMiniMp3 object,
 DFMiniMp3<HardwareSerial, Mp3Notify> mp3(Serial);
@@ -70,8 +71,7 @@ long lastHummed = 0;
 long wait = 5000;
 
 void setup(){
-    Serial.begin(9600);
-    for(int i = 0; i < count(SEGMENTS); i++){
+    for(int i = 0; i < SEGMENT_COUNT; i++){
         pinMode(i, OUTPUT);
     }
     pinMode(4, INPUT);
@@ -135,7 +135,15 @@ void play(int track){
 void ignite(){
     play(IGNITE);
 
-//    int one, two, three, four, fix, six = 0, 0, 0, 0, 0, 0;
+    // ignite is 1800 millis long
+    // 6 segments means each are 300ms apart
+    int brightness[] = { 0, -300, -600, -900 -1200, -1500 }
+
+    for(int i = 0, ; i < SEGMENT_COUNT; i++, brightness[0]++, brightness[1]++, brightness[2]++, brightness[3]++, brightness[4]++, brightness[5]++){
+        digitalWrite(SEGMENTS[i], brightness[i])
+        delay(1);
+    }
+
     waitMilliseconds(2500);
     isHumming = 1;
     play(HUM);
