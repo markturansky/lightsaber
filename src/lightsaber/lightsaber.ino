@@ -69,42 +69,29 @@ void waitMilliseconds(uint16_t msWait){
 
 int isHumming = 0;
 long lastHummed = 0;
-long wait = 5000;
+long wait = 10000;
 
 void setup(){
     for(int i = 0; i < SEGMENT_COUNT; i++){
         pinMode(i, OUTPUT);
     }
     pinMode(4, INPUT);
-
-    Serial.println("initializing...");
-
     mp3.begin();
-
-    uint16_t volume = mp3.getVolume();
-    Serial.print("volume ");
-    Serial.println(volume);
-    mp3.setVolume(60);
-
-    uint16_t count = mp3.getTotalTrackCount();
-    Serial.print("files ");
-    Serial.println(count);
-
-    Serial.println("starting...");
+    mp3.setVolume(40);
 }
 
 void loop(){
 
     long now = millis();
+    Serial.print("now = ");
+    Serial.println(now);
     long elapsed = now - lastHummed;
+    Serial.print("elapsed = ");
+    Serial.println(elapsed);    
     if (elapsed > wait){
         if(isHumming){
-            Serial.println("is humming!");
-            Serial.println("huummmmmmmmmmmmm   playing hum.");
             mp3.playMp3FolderTrack(HUM);
             lastHummed = now;
-            Serial.print("last hummed is ");
-            Serial.println(lastHummed);
         }
     }
 
@@ -134,17 +121,18 @@ void ignite(){
 
     // ignite is 1800 millis long
     // 6 segments means each are 300ms apart
-    int brightness[] = { 0, -300, -600, -900 -1200, -1500 };
+    int brightness[] = { 0, -50, -100, -150, -200, -250 };
 
     for(int i = 0; i < 1800; i++){
         for(int s = 0; s < SEGMENT_COUNT; s++){
             int b = brightness[s];
             if (b < 0){
-                b = 0;
+                b = 0;  
             }
-            int f = round(b / 7);
-
-            digitalWrite(SEGMENTS[s], f);
+            if (b > 250){
+                b = 250;
+            }
+            analogWrite(SEGMENTS[s], b);
         }
         for(int s = 0; s < SEGMENT_COUNT; s++){
            brightness[s]++;
@@ -152,7 +140,6 @@ void ignite(){
         delay(1);
     }
 
-    waitMilliseconds(2500);
     isHumming = 1;
     play(HUM);
     lastHummed = millis();
@@ -161,34 +148,27 @@ void ignite(){
 void powerdown(){
     play(POWER_DOWN);
     isHumming = 0;
-    for(int s = 0; s < SEGMENT_COUNT; s++){
-        digitalWrite(SEGMENTS[s], 0);
-    }
-    waitMilliseconds(2500);
 
     // ignite is 1800 millis long
     // 6 segments means each are 300ms apart
-    int brightness[] = { 1500, 1200, 900, 600, 300, 0};
+    int brightness[] = { 1000, 800, 700, 600, 500, 400};
+    int intialStartLoop = brightness[0];
+    for(int i = intialStartLoop; i >= 0; i--){
+        for(int s = 0; s < SEGMENT_COUNT; s++){
+            int b = brightness[s];
+             if (b < 0){
+                b = 0;  
+            }
+            if (b > 250){
+                b = 250;
+            }
 
-//    for(int i = 0; i < 1800; i++){
-//        for(int s = 0; s < SEGMENT_COUNT; s++){
-//            int b = brightness[s];
-//            if (b < 0){
-//                b = 0;
-//            }
-//            int f = round(b / 7);
-//
-//            digitalWrite(SEGMENTS[s], f);
-//        }
-//        for(int s = 0; s < SEGMENT_COUNT; s++){
-//           brightness[s]++;
-//        }
-//        delay(1);
-//    }
-//
-//    waitMilliseconds(2500);
-//    isHumming = 1;
-//    play(HUM);
-//    lastHummed = millis();
+            analogWrite(SEGMENTS[s], b);
+        }
+        for(int s = 0; s < SEGMENT_COUNT; s++){
+           brightness[s]--;
+        }
+        delay(1);
+    }
 }
 
